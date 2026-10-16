@@ -1,0 +1,11 @@
+{
+  "name": "مدير الديون الذكي SMS",
+  "short_name": "مدير الديون",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f2f5fa",
+  "theme_color": "#102544",
+  "description": "إدارة العملاء والديون والدفعات والحوالات محليًا"
+}
