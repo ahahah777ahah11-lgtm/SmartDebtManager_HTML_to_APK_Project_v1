@@ -1,0 +1,6 @@
+index.html — 10408 bytes
+style.css — 6018 bytes
+app.js — 19730 bytes
+manifest.json — 352 bytes
+README_AR.txt — 6088 bytes
+CSV_SAMPLE.csv — 112 bytes
