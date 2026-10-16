@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#102544">
+  <title>مدير الديون الذكي SMS</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>مدير الديون الذكي <span>SMS</span></h1>
+    <p>إدارة العملاء والديون والحوالات — يعمل محليًا</p>
+  </div>
+  <button id="backupBtn" class="btn light">نسخة احتياطية</button>
+</header>
+
+<main class="container">
+  <section class="stats" aria-label="ملخص الحسابات">
+    <article class="stat"><small>إجمالي الديون المسجلة</small><strong id="totalDebts">0</strong><span>ريال</span></article>
+    <article class="stat"><small>إجمالي الدفعات</small><strong id="totalPayments">0</strong><span>ريال</span></article>
+    <article class="stat"><small>الرصيد المستحق</small><strong id="totalDue">0</strong><span>ريال</span></article>
+    <article class="stat"><small>عدد العملاء</small><strong id="customerCount">0</strong><span>عميل</span></article>
+  </section>
+
+  <nav class="tabs" aria-label="أقسام التطبيق">
+    <button class="tab active" data-page="customersPage">العملاء</button>
+    <button class="tab" data-page="transactionsPage">الحركات المالية</button>
+    <button class="tab" data-page="transfersPage">الحوالات الواردة</button>
+    <button class="tab" data-page="reportsPage">التقارير والنسخ</button>
+  </nav>
+
+  <section id="customersPage" class="page active">
+    <div class="section-head">
+      <h2>العملاء</h2>
+      <button id="addCustomerBtn" class="btn primary">＋ إضافة عميل</button>
+    </div>
+    <div class="toolbar">
+      <input id="customerSearch" type="search" placeholder="ابحث بالاسم أو رقم الهاتف…" aria-label="بحث العملاء">
+      <button id="importCsvBtn" class="btn secondary">استيراد CSV</button>
+      <input id="csvFile" type="file" accept=".csv,.txt" hidden>
+    </div>
+    <div id="customersList" class="customer-list"></div>
+    <p id="emptyCustomers" class="empty">لا يوجد عملاء بعد. اضغط «إضافة عميل» للبدء.</p>
+  </section>
+
+  <section id="transactionsPage" class="page">
+    <div class="section-head"><h2>الحركات المالية</h2><button id="addTransactionBtn" class="btn primary">＋ تسجيل حركة</button></div>
+    <div class="toolbar">
+      <select id="transactionFilter"><option value="all">كل الحركات</option><option value="debt">الديون فقط</option><option value="payment">الدفعات فقط</option></select>
+      <button id="exportTransactionsBtn" class="btn secondary">تصدير الحركات CSV</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>التاريخ</th><th>العميل</th><th>النوع</th><th>المبلغ</th><th>الوصف</th><th>إجراء</th></tr></thead><tbody id="transactionsBody"></tbody></table></div>
+    <p id="emptyTransactions" class="empty">لا توجد حركات مالية مسجلة.</p>
+  </section>
+
+  <section id="transfersPage" class="page">
+    <div class="section-head"><h2>الحوالات الواردة</h2><button id="addTransferBtn" class="btn primary">＋ حوالة جديدة</button></div>
+    <div class="notice">لا تُحتسب الحوالة كدفعة إلا بعد تأكيد استلامها. تحليل الرسائل يستخرج الشركة ورقم الحوالة فقط عند التعرف على الصيغة؛ لا يفترض أن أي رقم هو المبلغ.</div>
+    <label class="field"><span>الصق نص رسالة الحوالة (اختياري)</span><textarea id="transferSmsText" rows="3" placeholder="الصق هنا نص رسالة النجم أو داديه أو الأكوع موني…"></textarea></label>
+    <button id="parseTransferBtn" class="btn secondary">تحليل الرسالة وتعبئة البيانات</button>
+    <div id="transfersList" class="transfer-list"></div>
+    <p id="emptyTransfers" class="empty">لا توجد حوالات مسجلة.</p>
+  </section>
+
+  <section id="reportsPage" class="page">
+    <div class="section-head"><h2>التقارير والنسخ الاحتياطي</h2></div>
+    <div class="report-grid">
+      <button id="exportBackupBtn" class="btn primary">تصدير نسخة JSON</button>
+      <button id="restoreBtn" class="btn secondary">استعادة نسخة JSON</button>
+      <input id="restoreFile" type="file" accept=".json,application/json" hidden>
+      <button id="exportCustomersBtn" class="btn secondary">تصدير العملاء CSV</button>
+      <button id="printReportBtn" class="btn secondary">طباعة / حفظ PDF</button>
+    </div>
+    <div class="panel">
+      <h3>ملاحظات الاستيراد</h3>
+      <ul>
+        <li>يدعم هذا الإصدار استيراد العملاء من CSV بترميز UTF-8، مع أعمدة للاسم والهاتف والملاحظات.</li>
+        <li>يمكن فتح ملف Excel ثم حفظه بصيغة CSV واستيراده.</li>
+        <li>استيراد PDF أو ملف قاعدة بيانات SQLite ‏(.db) يحتاج إلى محوّل/قارئ متخصص؛ لا يتم استيرادهما مباشرة في هذه النسخة كي لا تُقرأ البيانات بصورة خاطئة.</li>
+        <li>حفظ البيانات يتم محليًا داخل مساحة التطبيق. حذف بيانات التطبيق أو إلغاء تثبيته قد يمحوها؛ صدّر نسخة احتياطية بانتظام.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>قوالب رسائل التذكير</h3>
+      <label class="field"><span>نص الرسالة</span><textarea id="smsTemplate" rows="3">مرحبًا {name}، نذكرك بأن الرصيد المتبقي عليك هو {balance} ريال. نرجو تسوية المبلغ المستحق. شكرًا لك.</textarea></label>
+      <button id="saveTemplateBtn" class="btn secondary">حفظ القالب</button>
+    </div>
+  </section>
+</main>
+
+<dialog id="customerDialog">
+  <form id="customerForm" method="dialog">
+    <div class="dialog-head"><h2 id="customerDialogTitle">إضافة عميل</h2><button type="button" class="icon-btn" data-close="customerDialog">×</button></div>
+    <input type="hidden" id="customerId">
+    <label class="field"><span>اسم العميل *</span><input id="customerName" required maxlength="120" autocomplete="name"></label>
+    <label class="field"><span>رقم الهاتف</span><input id="customerPhone" inputmode="tel" maxlength="30"></label>
+    <label class="field"><span>ملاحظات</span><textarea id="customerNotes" rows="2"></textarea></label>
+    <div class="dialog-actions"><button type="button" class="btn secondary" data-close="customerDialog">إلغاء</button><button class="btn primary" type="submit">حفظ العميل</button></div>
+  </form>
+</dialog>
+
+<dialog id="transactionDialog">
+  <form id="transactionForm" method="dialog">
+    <div class="dialog-head"><h2>تسجيل حركة مالية</h2><button type="button" class="icon-btn" data-close="transactionDialog">×</button></div>
+    <label class="field"><span>العميل *</span><select id="transactionCustomer" required></select></label>
+    <label class="field"><span>نوع الحركة *</span><select id="transactionType"><option value="debt">دين جديد — يزيد الرصيد</option><option value="payment">دفعة — تخفض الرصيد</option></select></label>
+    <label class="field"><span>المبلغ *</span><input id="transactionAmount" type="number" min="0.01" step="0.01" required inputmode="decimal"></label>
+    <label class="field"><span>التاريخ *</span><input id="transactionDate" type="date" required></label>
+    <label class="field"><span>تاريخ الاستحقاق (اختياري)</span><input id="transactionDueDate" type="date"></label>
+    <label class="field"><span>الوصف / الملاحظات</span><input id="transactionNote" maxlength="250"></label>
+    <div class="dialog-actions"><button type="button" class="btn secondary" data-close="transactionDialog">إلغاء</button><button class="btn primary" type="submit">حفظ الحركة</button></div>
+  </form>
+</dialog>
+
+<dialog id="transferDialog">
+  <form id="transferForm" method="dialog">
+    <div class="dialog-head"><h2>تسجيل حوالة واردة</h2><button type="button" class="icon-btn" data-close="transferDialog">×</button></div>
+    <label class="field"><span>شركة الصرافة *</span><input id="transferCompany" required placeholder="مثال: داديه"></label>
+    <label class="field"><span>رقم الحوالة *</span><input id="transferNumber" required inputmode="numeric"></label>
+    <label class="field"><span>العميل (يمكن اختياره لاحقًا)</span><select id="transferCustomer"></select></label>
+    <label class="field"><span>المبلغ (لا يُستنتج تلقائيًا من رقم الرسالة)</span><input id="transferAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+    <label class="field"><span>تاريخ التسجيل</span><input id="transferDate" type="date" required></label>
+    <label class="field"><span>ملاحظات</span><input id="transferNote" maxlength="250"></label>
+    <div class="dialog-actions"><button type="button" class="btn secondary" data-close="transferDialog">إلغاء</button><button class="btn primary" type="submit">حفظ الحوالة</button></div>
+  </form>
+</dialog>
+
+<dialog id="statementDialog">
+  <div class="dialog-head"><h2 id="statementTitle">كشف حساب العميل</h2><button type="button" class="icon-btn" data-close="statementDialog">×</button></div>
+  <div id="statementContent"></div>
+  <div class="dialog-actions"><button id="statementSmsBtn" class="btn secondary">تجهيز SMS</button><button class="btn primary" type="button" data-close="statementDialog">إغلاق</button></div>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
